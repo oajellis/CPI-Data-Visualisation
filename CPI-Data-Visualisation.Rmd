@@ -1,23 +1,16 @@
 ---
-title: "index"
+title: "Using R to investigate changes in perceived corruption in the UK, compared to both Europe and Worldwide"
 author: "Oliver Ellis"
 date: "2023-05-15"
 output: html_document
 ---
 
----
-title: "Index"
-author: "Oliver Ellis"
-date: "2023-05-15"
-output: html_document
----
 ```{r, include = FALSE}
 library(tidyverse)
 library(readr)
 library(tidyr)
 library(dplyr)
 ```
-# **Using R to investigate changes in perceived corruption in the UK, compared to both Europe and Worldwide**
 
 # Data Origins
 
@@ -56,7 +49,7 @@ The data used for this project can be found here: [Corruption Perceptions Index]
 Data was synthesised from the TI CPI archives into an excel spreadsheet, saved as a csv file, then input into R using read_csv from the tidyverse library, which was installed and loaded at the beginning of the project. This original dataframe was named 'raw_data':
 
 ```{r import, include = FALSE}
-raw_data<-read_csv("C:\\Users\\olive\\OneDrive\\Documents\\CPI Data Visualisation Project\\CPI by country by year csv.csv")
+raw_data<-read_csv("C:\\Users\\olive\\OneDrive\\Documents\\CPI-Data-Visualisation\\CPI by country by year csv.csv")
 ```
 
 ```{r, echo = FALSE}

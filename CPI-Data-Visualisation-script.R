@@ -7,8 +7,7 @@ install.packages("readr")
 library(readr)
 
 # use read_csv function to load in data file
-raw_data<-read_csv("C:\\Users\\olive\\OneDrive\\Documents\\CPI Data Visualisation Project\\CPI by country by year csv.csv")
-
+raw_data<-read_csv("C:\\Users\\olive\\OneDrive\\Documents\\CPI-Data-Visualisation\\CPI by country by year csv.csv")
 # raw_data delineates the data frame containing all data to be used for the project, before data wrangling
 # install and load dplyr and tidyr for data wrangling
 install.packages("dplyr")
