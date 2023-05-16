@@ -1,0 +1,279 @@
+---
+title: "index"
+author: "Oliver Ellis"
+date: "2023-05-15"
+output: html_document
+---
+
+```{r, include = FALSE}
+library(tidyverse)
+library(readr)
+library(tidyr)
+library(dplyr)
+```
+# **Using R to investigate changes in perceived corruption in the UK, compared to both Europe and Worldwide**
+
+# Data Origins
+
+Worldwide Corruption Perceptions Index (CPI) data is collected by Transparency International (TI), a non profit organisation aiming to combat global corruption. CPI is an index which attempts to rank included countries by their levels of perceived corruption in their public sector. The use of 'perceived' is key - the nature of corruption means that it is typically hidden from public knowledge - only brought to light by public scandals and leaks. This means that the CPI is a measure of the perceived levels of public sector corruption in a country - not the objective levels.
+
+The CPI takes data from 13 different surveys from 12 institutions across the globe, each survey assesses the perspectives of experts and business people on various types of public sector corruption, such as:
+
+* *Bribery*
+
+* *Diversion of Public Funds*
+
+* *Officials using their Public Office for Private Gain without consequence*
+
+* *Ability of governments to contain corruption in the public sector*
+
+This list is not exhaustive, but gives a good snapshot of the types of corruption the CPI includes. However, it is important to note what the CPI measure does not cover:
+
+* *Citizen's direct perceptions or experience of corruption*
+
+* *Tax Fraud*
+
+* *Illicit Financial Flows*
+
+* *Enablers of corruption*
+
+* *Money laundering*
+
+* *Private Sector Corruption*
+
+* *Informal Economies and Markets*
+
+TI has collated CPI data yearly since 1995, and since 2012 has measured it on a scale of 0-100 where 0 = highly corrupt and 100 = clean. The raw data for this project listed the 179 countries included in the 2022 CPI, alongside their CPI score for every year from 2012 - 2022. This is the most up-to-date data, as CPI is published every January and therefore the 2022 data was published in January 2023.
+
+The data used for this project can be found here: [Corruption Perceptions Index](https://www.transparency.org/en/cpi/2022/)
+
+Data was synthesised from the TI CPI archives into an excel spreadsheet, saved as a csv file, then input into R using read_csv from the tidyverse library, which was installed and loaded at the beginning of the project. This original dataframe was named 'raw_data':
+
+```{r import, include = FALSE}
+raw_data<-read_csv("C:\\Users\\olive\\OneDrive\\Documents\\CPI Data Visualisation Project\\CPI by country by year csv.csv")
+```
+
+```{r, echo = FALSE}
+head(raw_data)
+```
+Above is a brief summary of the raw data, showing CPI score per year by Country. This was later cleaned with R to create an entirely new dataframe, which was then used to plot the visualisation.
+
+# Research Questions
+
+I had two main research questions that I aimed to answer with this data visualisation project:
+
+* *How have measures of corruption perception (CPI) changed in the UK over the last ten years?* 
+
+* *How does this compare to European and Worldwide averages of perceived corruption?*
+
+# Data Preparation
+
+The original data showed each of the 179 countries in the first column, followed by their score for each year 2012 - 2022 in the next 10 columns. However, I intended to plot the World Average Score per year, European Average Score per year, and the UK score per year only.
+
+The first step to do this was to create a World Averages dataframe. I therefore needed to calculate the average of every column 2012 - 2022 and exclude any missing data. Some countries are not included every year, as they must be assessed by at least three different institutional bodies to be included in the CPI, which can result in missing data for some countries in some years.
+
+To do this, I used the colMeans function, and included na.rm(TRUE) to tell R to ignore any missing data points in the calculations. In order for this to work, I also had to tell R that the data was numerical:
+
+```{r}
+worldavg <- colMeans (raw_data[sapply(raw_data, is.numeric)], na.rm = TRUE)
+```
+This produced a value set called 'worldavg' in R, displaying the worldwide average CPI per year, shown below:
+
+```{r, echo= FALSE}
+head(worldavg)
+```
+
+Next, I needed to repeat this for the European countries only, to calculate the European Average per year. The first step was to filter by a complete list of the European Countries in the original raw_data set, using the filter() function:
+
+```{r}
+europeavg <- filter(raw_data, Country %in% c("Russia", 
+                                               "Germany",
+                                               "UK",
+                                               "France",
+                                               "Belarus",
+                                               "Bulgaria",
+                                               "Norway",
+                                               "Bosnia and Herzegovina",
+                                               "Slovenia",
+                                               "Luxembourg",
+                                               "Italy",
+                                               "Spain",
+                                               "Ukraine",
+                                               "Poland",
+                                               "Austria",
+                                               "Denmark",
+                                               "Ireland",
+                                               "Albania",
+                                               "Latvia",
+                                               "Malta",
+                                               "Romania",
+                                               "Netherlands",
+                                               "Belgium",
+                                               "Czechia",
+                                               "Serbia",
+                                               "Finland",
+                                               "Croatia",
+                                               "Lithuania",
+                                               "Estonia",
+                                               "Iceland",
+                                               "Greece", 
+                                               "Portugal",
+                                               "Sweden",
+                                               "Hungary",
+                                               "Switzerland",
+                                               "Slovakia",
+                                               "Moldova",
+                                               "North Macedonia",
+                                               "Montenegro"))
+```
+                                               
+This created a value set that was the yearly score for each European country included, as formatted in the raw_data set. I then repeated the steps taken for worldavg, and used the colMeans and na.rm(TRUE) statement again.
+
+This line told R to write over the original filtered europeavg value set with the average score per year for the countries included:
+
+```{r}
+europeavg <- colMeans(europeavg[sapply(europeavg, is.numeric)], na.rm = TRUE)
+```
+
+This resulted in creation of a europeavg value set, similar to the worldavg value set created earlier:
+
+```{r, echo = FALSE}
+head(europeavg)
+```
+
+I then had to convert the worldavg and europeavg value sets to individual dataframes, called Worldavgdata and Europeavgdata, respectively. 
+
+I did this using the bind_rows and cbind functions from the dplyr package library, which had been installed and loaded at the beginning of the project.
+
+First, to create dataframe 'Worldavgdata':
+
+```{r}
+Worldavgdata <- bind_rows(worldavg)
+Worldavgdata <- cbind(Worldavgdata, Country="World Average")
+Worldavgdata <- Worldavgdata[, c("Country", names(Worldavgdata)[-which(names(Worldavgdata)=="Country")])]
+```
+```{r, echo = FALSE}
+head(Worldavgdata)
+```
+Then, to create dataframe 'Europeavgdata':
+
+```{r}
+Europeavgdata <- bind_rows(europeavg)
+Europeavgdata <- cbind(Europeavgdata, Country="European Average")
+Europeavgdata <- Europeavgdata[, c("Country", names(Europeavgdata)[-which(names(Europeavgdata)=="Country")])]
+```
+
+```{r, echo = FALSE}
+head(Europeavgdata)
+```
+
+The third variable I wished to plot was the UK score per year. I again used the filter() function to filter out the single row of UK score data from the raw_data dataframe.
+
+```{r}
+uk_score <- filter(raw_data, Country == 'UK')
+```
+```{r, echo= FALSE}
+head(uk_score)
+```
+
+From there, I needed to bind the Worldavgdata, Europeavgdata, and uk_score dataframes into one, long form, dataframe for R to plot. 
+
+I first created a dataframe called 'plotdata' which contained the bound together Worldavgdata, Europeavgdata, and uk_score dataframes into one. I again used the bind_rows function to accomplish this:
+
+```{r}
+plotdata <- bind_rows(uk_score, Europeavgdata, Worldavgdata)
+```
+
+This achieved the need for all three dataframes to be bound as one, however the data was wide form:
+
+```{r, echo = FALSE}
+head(plotdata)
+```
+
+R prefers to plot long form data, so to convert this dataframe to long form, I used the following code block:
+
+```{r}
+tidyplotdata <- plotdata %>%
+  pivot_longer(cols=-c("Country"),
+                        names_to = "Year",
+                          values_to = "CPI_score")
+```
+
+I named the new, long form, dataframe as 'tidyplotdata'. The wide form 'plotdata' dataframe was input using the %>% pipe function from tidyverse for ease. 
+
+I then used the pivot_longer function to convert from wide form to long form, splitting the data by Country (UK/Europe Average/World Average), Year (2012 - 2022) and CPI score (0-100). This produced a dataframe like this:
+
+```{r, echo = FALSE}
+head(tidyplotdata)
+```
+
+Which repeated length ways from 2012 - 2022 for UK, World Average, and European Average scores. This format is easier for R to plot onto a visualisation.
+
+# Visualisation
+
+Given that the data is scores over time, it made sense to plot it as a line graph; using the ggplot, geom_path, and geom_point functions from the tidyverse library.
+
+```{r, fig.keep = "none"}
+ggplot(tidyplotdata, aes(x = Year, y = CPI_score, colour = Country, group=Country))+ # x/y axis labels and line group
+  geom_point(size = 4, alpha = 0.3)+ # dot size and transparency
+  geom_path(linewidth = 1)+ # specifies line width
+  theme_gray()+ # theme
+  labs(title = "Percieved levels of corruption in the UK over time, compared to \n World Average and European Average",
+       subtitle = "Plot of Corruption Perception Index (CPI) scores by year 2012 - 2022")+ #labels
+  theme (plot.title = element_text(face = "bold"))+ # make title bold
+  scale_y_reverse()
+```
+
+The ggplot function is telling R what dataset to plot the graph from, in this case I plotted from the 'tidyplotdata' dataframe created from the original wide form 'plotdata'.
+
+The 'aes' tells R about how I want the graph to look. The X and Y axis are determined as the variables 'Year' and 'Size' respectively.
+
+Since I plotted a graph with multiple lines, I had to tell R how to separate the data, which was done with the phrase 'colour = Country, group = Country' this told R to use a separate colour for each Country's data, and to connect the data from each Country separately. This produces three separate lines (one for each Country) on the resulting plot, each coloured separately.
+
+* *'geom_point'* told R what size and transparency to have the dots on the graph.
+
+* *'geom_path'* specified to R to draw a line graph, and what size the line connecting the dots should be.
+
+* *'theme_gray'* told R to make the backround of the graph gray.
+
+* *'labs'* told R what to title the graph, including subtitle. Note the use of '\n' which split the title across two lines.
+I then used the 'theme' function to make the title bold.
+
+* *'scale_y_reverse'* was added to flip the Y axis scale upside down. The way the CPI scale is formulated means that a lower score means higher corruption and vice versa. Without this line, this is the plot produced:
+
+##### **Initial graph**
+
+```{r, echo = FALSE}
+ggplot(tidyplotdata, aes(x = Year, y = CPI_score, colour = Country, group=Country))+ # x/y axis labels and line group
+  geom_point(size = 4, alpha = 0.3)+ # dot size and transparency
+  geom_path(linewidth = 1)+ # specifies line width and dot grouping
+  theme_gray()+ # theme
+  labs(title = "Percieved levels of corruption in the UK over time, compared to \n World Average and European Average",
+       subtitle = "Plot of Corruption Perception Index (CPI) scores by year 2012 - 2022")+ #labels
+  theme (plot.title = element_text(face =  "bold")) # make title bold
+```
+
+Whilst this plot isn't inaccurate, it may be misleading to those unfamiliar with the CPI scale, falsely indicating that the UK has higher perceived corruption levels than World and European averages. Including 'scale_y_reverse' resolves this issue, sending a much clearer and more readable message to those without prior knowledge:
+
+##### **Final Graph**
+
+```{r, echo = FALSE}
+ggplot(tidyplotdata, aes(x = Year, y = CPI_score, colour = Country, group=Country))+ # x/y axis labels and line group
+  geom_point(size = 4, alpha = 0.3)+ # dot size and transparency
+  geom_path(linewidth = 1)+ # specifies line width
+  theme_gray()+ # theme
+  labs(title = "Percieved levels of corruption in the UK over time, compared to \n World Average and European Average",
+       subtitle = "Plot of Corruption Perception Index (CPI) scores by year 2012 - 2022")+ #labels
+  theme (plot.title = element_text(face = "bold"))+ # make title bold
+  scale_y_reverse()
+```
+
+Showing that the UK has significantly lower levels of perceived corruption than both European and World Averages consistently for the last 10 years, but levels of perceived corruption have slowly increased since 2017, getting closer to the European Average.
+
+# Summary
+
+This project has taught me how to use R, the best ways to use it for data visualisation, and how to problem solve/find alternative solutions using my peers and books/web resources when things do not work the way I intended.
+
+If I were to continue or extend this project, I could map how CPI changes with significant public sector events and scandals, such as: elections, wars, recessions, and pandemics. It would be interesting to see whether how these events are reflected in CPI scores over time - especially since TI themselves state that changes in levels of corruption can take a year or two to be reflected in CPI scores.
+
+
